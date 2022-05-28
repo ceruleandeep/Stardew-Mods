@@ -18,6 +18,7 @@ namespace BetterJunimos {
     public class BetterJunimos : Mod {
         internal static ModConfig Config;
         internal static IMonitor SMonitor;
+        internal static IManifest SManifest;
         internal static IModHelper SHelper;
         internal static Maps CropMaps;
 
@@ -29,6 +30,7 @@ namespace BetterJunimos {
         public override void Entry(IModHelper helper) {
             SMonitor = Monitor;
             SHelper = helper;
+            SManifest = ModManifest;
             
             Config = helper.ReadConfig<ModConfig>();
             SaveConfig();
@@ -108,6 +110,7 @@ namespace BetterJunimos {
             replacements.Add("tryToHarvestHere", junimoType, typeof(PatchTryToHarvestHere));
             replacements.Add("update", junimoType, typeof(PatchJunimoShake));
             replacements.Add("pokeToHarvest", junimoType, typeof(PatchPokeToHarvest));
+            replacements.Add("tryToAddItemToHut", junimoType, typeof(tryToAddItemToHut));
 
             // improve pathfinding
             replacements.Add("pathfindToRandomSpotAroundHut", junimoType, typeof(PatchPathfindToRandomSpotAroundHut));
@@ -503,6 +506,12 @@ namespace BetterJunimos {
                     val => Config.JunimoImprovements.AvoidPlantingCoffee = val,
                     () => Helper.Translation.Get("cfg.avoid-planting-coffee"),
                     () => ""
+                );
+                configMenu.AddBoolOption(ModManifest,
+                    () => Config.JunimoImprovements.AvoidReplantingSeeds,
+                    val => Config.JunimoImprovements.AvoidReplantingSeeds = val,
+                    () => Helper.Translation.Get("cfg.avoid-replanting-seeds"),
+                    () => Helper.Translation.Get("cfg.avoid-replanting-seeds.msg")
                 );
                 configMenu.AddBoolOption(ModManifest,
                     () => Config.JunimoImprovements.AvoidPlantingOutOfSeason,

@@ -56,6 +56,8 @@
   "cfg.harvest-everything-on-28th": "Harvest Everything On 28th",
   "cfg.harvest-everything-on-28th.tooltip": "If avoiding harvest of flowers or giant crops, harvest them on the last day of the month before they die",
   "cfg.avoid-planting-coffee": "Avoid Planting Coffee",
+  "cfg.avoid-replanting-seeds": "Avoid Replanting Seeds",
+  "cfg.avoid-replanting-seeds.msg": "Avoid re-planting seeds we've harvested (coffee, ancient coffee, whatever other crazy self-replicating crops you add...)",
   "cfg.avoid-planting-out-of-season": "Avoid Planting Out Of Season",
   "cfg.payment": "Payment",
   "cfg.work-for-wages": "Work For Wages",

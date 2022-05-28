@@ -27,6 +27,7 @@ namespace BetterJunimos {
             public bool AvoidHarvestingGiants { get; set; } = true;
             public bool HarvestEverythingOn28th { get; set; } = true;
             public bool AvoidPlantingCoffee { get; set; } = true;
+            public bool AvoidReplantingSeeds { get; set; } = true;
             public bool AvoidPlantingOutOfSeason { get; set; } = true;
         }
 

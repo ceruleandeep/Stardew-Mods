@@ -9,6 +9,7 @@ using StardewValley.TerrainFeatures;
 using System.Collections.Generic;
 using StardewModdingAPI;
 using StardewValley.Buildings;
+using StardewValley.Menus;
 using SObject = StardewValley.Object;
 
 namespace BetterJunimos.Abilities {
@@ -27,7 +28,7 @@ namespace BetterJunimos.Abilities {
         internal PlantCropsAbility(IMonitor Monitor) {
             this.Monitor = Monitor;
             var seasons = new List<string>{"spring", "summer", "fall", "winter"};
-            foreach (string season in seasons) {
+            foreach (var season in seasons) {
                 cropSeasons[season] = new Dictionary<int, bool>();
             }
         }
@@ -48,10 +49,10 @@ namespace BetterJunimos.Abilities {
             if (!plantable) return false;
             
             // todo: this section is potentially slow and might be refined
-            JunimoHut hut = Util.GetHutFromId(guid);
-            Chest chest = hut.output.Value;
-            string cropType = BetterJunimos.CropMaps.GetCropForPos(hut, pos);
-            Item foundItem = PlantableSeed(location, chest, cropType);
+            var hut = Util.GetHutFromId(guid);
+            var chest = hut.output.Value;
+            var cropType = BetterJunimos.CropMaps.GetCropForPos(hut, pos);
+            var foundItem = PlantableSeed(location, chest, cropType);
 
             return foundItem is not null;
 
@@ -88,13 +89,14 @@ namespace BetterJunimos.Abilities {
                 item != null 
                 && item.Category == ItemCategory
                 && !IsTreeSeed(item)
+                && !(BetterJunimos.Config.JunimoImprovements.AvoidReplantingSeeds && item.modData.ContainsKey($"{BetterJunimos.SManifest.UniqueID}/Harvested"))
                 && !(BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee && item.ParentSheetIndex == Util.CoffeeId)
             );
             
             switch (cropType)
             {
                 case CropTypes.Trellis:
-                    foundItems = foundItems.FindAll(item => IsTrellisCrop(item));
+                    foundItems = foundItems.FindAll(IsTrellisCrop);
                     break;
                 case CropTypes.Ground:
                     foundItems = foundItems.FindAll(item => !IsTrellisCrop(item));
@@ -111,7 +113,6 @@ namespace BetterJunimos.Abilities {
                     // there is no way that a sunflower planted on Fall 25 will grow to harvest
                     continue;
                 }
-                
                 var key = foundItem.ParentSheetIndex;
                 try {
                     if (cropSeasons[Game1.currentSeason][key]) {
@@ -226,51 +227,6 @@ namespace BetterJunimos.Abilities {
             }
         }
 
-        // taken from SDV planting code [applySpeedIncreases()], updated for 1.5
-        private void OldApplyFertilizer(HoeDirt hd, Crop crop) {
-            int fertilizer = hd.fertilizer.Value;
-            Farmer who = Game1.player;
-
-            if (crop == null) {
-                return;
-            }
-            if (!(((int)fertilizer == 465 || (int)fertilizer == 466 || (int)fertilizer == 918 || who.professions.Contains(5)))) {
-                return;
-            }
-            crop.ResetPhaseDays();
-            int totalDaysOfCropGrowth = 0;
-            for (int j = 0; j < crop.phaseDays.Count - 1; j++) {
-                totalDaysOfCropGrowth += crop.phaseDays[j];
-            }
-            float speedIncrease = 0f;
-            if ((int)fertilizer == 465) {
-                speedIncrease += 0.1f;
-            }
-            else if ((int)fertilizer == 466) {
-                speedIncrease += 0.25f;
-            }
-            else if ((int)fertilizer == 918) {
-                speedIncrease += 0.33f;
-            }
-            if (who.professions.Contains(5)) {
-                speedIncrease += 0.1f;
-            }
-            int daysToRemove = (int)Math.Ceiling((float)totalDaysOfCropGrowth * speedIncrease);
-            int tries = 0;
-            while (daysToRemove > 0 && tries < 3) {
-                for (int i = 0; i < crop.phaseDays.Count; i++) {
-                    if ((i > 0 || crop.phaseDays[i] > 1) && crop.phaseDays[i] != 99999) {
-                        crop.phaseDays[i]--;
-                        daysToRemove--;
-                    }
-                    if (daysToRemove <= 0) {
-                        break;
-                    }
-                }
-                tries++;
-            }
-        }
-        
         /* older API compat */
         public bool IsActionAvailable(Farm farm, Vector2 pos, Guid guid) {
             return IsActionAvailable((GameLocation) farm, pos, guid);

@@ -11,7 +11,6 @@ using SObject = StardewValley.Object;
 
 namespace BetterJunimos.Abilities {
     public class FertilizeAbility : IJunimoAbility {
-        private const int ItemCategory = SObject.fertilizerCategory;
         private List<int> _RequiredItems;
         
         public string AbilityName() {
@@ -25,13 +24,12 @@ namespace BetterJunimos.Abilities {
             if (hd.crop is null) return true;
 
             // now we allow fertilizing just-planted crops
-            if (hd.crop.currentPhase.Value > 1) return false;
-            return true;
+            return hd.crop.currentPhase.Value <= 1;
         }
 
         public bool PerformAction(GameLocation location, Vector2 pos, JunimoHarvester junimo, Guid guid) {
             var chest = Util.GetHutFromId(guid).output.Value;
-            var foundItem = chest.items.FirstOrDefault(item => item is {Category: ItemCategory});
+            var foundItem = chest.items.FirstOrDefault(item => item is {Category: SObject.fertilizerCategory});
             if (foundItem == null) return false;
 
             Fertilize(location, pos, foundItem.ParentSheetIndex);
@@ -55,11 +53,13 @@ namespace BetterJunimos.Abilities {
 
         private static void Fertilize(GameLocation location, Vector2 pos, int index) {
             if (location.terrainFeatures[pos] is not HoeDirt hd) return;
+            // BetterJunimos.SMonitor.Log($"Fertilize < {pos} {index} {hd.fertilizer.Value}", LogLevel.Debug);
             hd.fertilizer.Value = index;
             CheckSpeedGro(hd, hd.crop);
             if (Utility.isOnScreen(Utility.Vector2ToPoint(pos), 64, location)) {
                 location.playSound("dirtyHit");
             }
+            // BetterJunimos.SMonitor.Log($"Fertilize > {pos} {index} {hd.fertilizer.Value}", LogLevel.Debug);
         }
 
         // taken from SDV planting code [applySpeedIncreases()], updated for 1.5
@@ -115,8 +115,7 @@ namespace BetterJunimos.Abilities {
                 tries++;
             }
         }
-        
-        
+
         /* older API compat */
         public bool IsActionAvailable(Farm farm, Vector2 pos, Guid guid) {
             return IsActionAvailable((GameLocation) farm, pos, guid);

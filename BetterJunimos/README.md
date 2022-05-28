@@ -5,7 +5,10 @@
 * Nothing, it's perfect haha
 
 ## Changelog
-
+* 2.1.1 RELEASE
+  * Pathfinding in greenhouses is now 37% less derpy
+* 2.1.0 RELEASE
+  * By default Junimos will not re-plant seeds they've harvested
 * 2.0.8 RELEASE
   * Redo asset loaders for new SMAPI
   * How bout we actually bundle the CP mod into the bundle this time
