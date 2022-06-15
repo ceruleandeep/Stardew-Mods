@@ -11,6 +11,7 @@ using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Menus;
 using BetterJunimos.Utils;
+using StardewValley.Locations;
 using StardewValley.Objects;
 
 namespace BetterJunimos {
@@ -143,9 +144,8 @@ namespace BetterJunimos {
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e) {
-            if (!Context.IsWorldReady) {
-                return;
-            }
+            if (!Context.IsWorldReady) return;
+            if (Game1.activeClickableMenu is not null) return;
 
             if (e.Button.IsUseToolButton() && Config.Other.HutClickEnabled) {
                 if (!AlternativeTexturesActive() && ShowPerfectionTracker(e)) {
@@ -162,7 +162,7 @@ namespace BetterJunimos {
             }
 
             if (e.Button == Config.Other.SpawnJunimoKeybind) {
-                Monitor.Log($"spawn {e.Button} {Config.Other.SpawnJunimoKeybind}", LogLevel.Info);
+                Monitor.Log($"spawn {e.Button} {Config.Other.SpawnJunimoKeybind}", LogLevel.Trace);
                 SpawnJunimoCommand();
             }
         }
@@ -244,7 +244,7 @@ namespace BetterJunimos {
         /// <summary>Raised after the game begins a new day (including when the player loads a save).</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
-        void OnDayStarted(object sender, DayStartedEventArgs e) {
+        private void OnDayStarted(object sender, DayStartedEventArgs e) {
             if (Config.JunimoPayment.WorkForWages) {
                 Util.Payments.JunimoPaymentsToday.Clear();
                 Util.Payments.WereJunimosPaidToday = false;
@@ -257,23 +257,18 @@ namespace BetterJunimos {
                 hut.output.Value.modData[$"{ModManifest.UniqueID}/JunimoChest"] = "true";
             }
             
-            if (huts.Any()) {
+            if (huts.Any()) { 
                 CheckHutsForWagesAndProgressionItems();
                 Util.Progression.DayStartedProgressionPrompt(Game1.IsWinter, Game1.isRaining);
                 JunimoAbilities.ResetCooldowns();
             }
-
+            
             foreach (var location in Game1.locations) {
-                var toRemove = location.characters.Where(npc => npc is JunimoHarvester).ToList();
-                if (toRemove.Count > 0) {
-                    Monitor.Log($"{location.Name} has {toRemove.Count} Junimos", LogLevel.Trace);
-                }
-
-                foreach (var npc in toRemove) {
-                    var junimo = (JunimoHarvester) npc;
-                    Monitor.Log($"    Removing Junimo {junimo.whichJunimoFromThisHut} from {location.Name}",
-                        LogLevel.Trace);
-                    location.characters.Remove(npc);
+                EvictJunimos(location);
+                if (location is not BuildableGameLocation buildableGameLocation) continue;
+                foreach (var building in buildableGameLocation.buildings.Where(building => building.indoors.Value != null))
+                {
+                    EvictJunimos(building.indoors.Value);
                 }
             }
 
@@ -281,6 +276,15 @@ namespace BetterJunimos {
             SaveConfig();
         }
 
+        private void EvictJunimos(GameLocation location) {
+            for (var index = location.characters.Count - 1; index >= 0; --index)
+            {
+                var character = location.characters[index];
+                if (character is not JunimoHarvester) continue;
+                location.characters.RemoveAt(index);
+            }
+        }
+        
         private void CheckHutsForWagesAndProgressionItems() {
             var alreadyPaid = Util.Payments.WereJunimosPaidToday;
 

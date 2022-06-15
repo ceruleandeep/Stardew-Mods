@@ -1,10 +1,10 @@
 {
     "Name": "[CP] Better Junimos Config Wizard",
     "Author": "ceruleandeep",
-    "Version": "1.0.2",
+    "Version": "1.0.3",
     "Description": "Better Junimos Config Wizard",
     "UniqueID": "ceruleandeep.BetterJunimos.CP",
-    "UpdateKeys": [],
+    "UpdateKeys": ["Nexus:???"],
     "ContentPackFor": {
         "UniqueID": "Pathoschild.ContentPatcher"
     },

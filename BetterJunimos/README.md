@@ -5,6 +5,9 @@
 * Nothing, it's perfect haha
 
 ## Changelog
+* 2.1.2 RELEASE
+  * No spawning Junimos with a menu open
+  * Clear stray Junimos from internal buildings like coops 
 * 2.1.1 RELEASE
   * Pathfinding in greenhouses is now 37% less derpy
 * 2.1.0 RELEASE
